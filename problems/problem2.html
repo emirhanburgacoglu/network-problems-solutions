@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHCP Scope Issue | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html" class="active">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>DHCP Scope Issue</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 3</span>
+                    <span class="difficulty">Difficulty: Medium</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>DHCP scope issues occur when the DHCP server cannot assign IP addresses to network devices due to IP pool exhaustion or misconfiguration. This Layer 3 problem affects network connectivity and can prevent new devices from joining the network.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>New devices cannot obtain IP addresses</li>
+                        <li>Devices receive APIPA addresses (169.254.x.x)</li>
+                        <li>DHCP request failures</li>
+                        <li>Limited or no network connectivity</li>
+                        <li>"No IP address available" messages</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>Insufficient IP addresses in DHCP pool</li>
+                        <li>Excessive excluded address range</li>
+                        <li>IP address conflicts with static assignments</li>
+                        <li>Improper DHCP server configuration</li>
+                        <li>Network growth beyond planned capacity</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Solution Approach</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Network Design</h4>
+                        <div class="topology-container">
+                            <img src="../images/dhcp-topology.png" alt="Network Topology" class="img-large">
+                            <p>Implementation requires:</p>
+                            <ul>
+                                <li>Router (Cisco 2911) as DHCP server</li>
+                                <li>Switch (Cisco 2960)</li>
+                                <li>Multiple end devices as DHCP clients</li>
+                                <li>Proper network addressing scheme</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: Initial Configuration</h4>
+                        <div class="config-block">
+                            <img src="../images/dhcp-router-config.png" alt="Initial DHCP Configuration" class="img-medium">
+                            <pre><code>
+! Initial Router Configuration
+Router>enable
+Router#configure terminal
+Router(config)#interface GigabitEthernet0/0
+Router(config-if)#ip address 192.168.1.1 255.255.255.0
+Router(config-if)#no shutdown
+
+! DHCP Pool Configuration
+Router(config)#ip dhcp pool NETWORK_POOL
+Router(config-dhcp)#network 192.168.1.0 255.255.255.0
+Router(config-dhcp)#default-router 192.168.1.1
+Router(config-dhcp)#dns-server 8.8.8.8</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: Problem Demonstration</h4>
+                        <div class="test-results">
+                            <img src="../images/dhcp-failure.png" alt="DHCP Failure" class="img-medium">
+                            <div class="warning-note">
+                                <p>DHCP requests fail due to excessive address exclusion:</p>
+                                <code>Router(config)#ip dhcp excluded-address 192.168.1.2 192.168.1.254</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 4: Solution Implementation</h4>
+                        <div class="config-block">
+                            <img src="../images/dhcp-solution-config.png" alt="DHCP Solution Configuration" class="img-medium">
+                            <pre><code>
+! Remove excessive exclusion
+Router(config)#no ip dhcp excluded-address 192.168.1.2 192.168.1.254
+
+! Set reasonable exclusion range
+Router(config)#ip dhcp excluded-address 192.168.1.1 192.168.1.10</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 5: Verification</h4>
+                        <div class="test-results">
+                            <img src="../images/dhcp-solution-success.png" alt="DHCP Success" class="img-medium">
+                            <div class="success-note">
+                                <p>Clients successfully receive IP addresses and can communicate on the network.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Common Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> DHCP requests failing
+                            <br><strong>Solution:</strong> Verify DHCP pool configuration and available addresses</li>
+                        
+                        <li><strong>Issue:</strong> IP conflicts
+                            <br><strong>Solution:</strong> Check excluded-address ranges and static IP assignments</li>
+                        
+                        <li><strong>Issue:</strong> APIPA addresses being assigned
+                            <br><strong>Solution:</strong> Ensure DHCP server is running and reachable</li>
+                        
+                        <li><strong>Issue:</strong> Limited IP availability
+                            <br><strong>Solution:</strong> Adjust DHCP scope and exclusion ranges</li>
+                    </ul>
+
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show ip dhcp pool</code> - Display DHCP pool information</li>
+                            <li><code>show ip dhcp binding</code> - Show current IP address assignments</li>
+                            <li><code>show running-config | section dhcp</code> - Review DHCP configuration</li>
+                            <li><code>ipconfig /release</code> and <code>ipconfig /renew</code> - Test DHCP on clients</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice this configuration:</p>
+                    <a href="../packet-tracer/dhcp-problem.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+
+        </div>
+    </footer>
+</body>
+</html>

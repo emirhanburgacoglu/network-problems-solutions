@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Port Security Violation | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html" class="active">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>Port Security Violation Issue</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 2 (Data Link)</span>
+                    <span class="difficulty">Difficulty: Medium</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>Port security is a Layer 2 feature that restricts a port's ingress traffic by limiting the MAC addresses that can send traffic into the port. When a port configured with port security receives traffic from an unauthorized MAC address, a security violation occurs. Depending on the configured violation mode, this can result in the port being automatically disabled, blocking traffic, or generating alerts.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Sudden loss of network connectivity on specific switch ports</li>
+                        <li>Ports showing "err-disabled" status</li>
+                        <li>Legitimate devices unable to connect to the network</li>
+                        <li>Security violation alerts in switch logs</li>
+                        <li>Inconsistent network access for mobile devices</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>Unauthorized device connected to a secure port</li>
+                        <li>MAC address spoofing attempts</li>
+                        <li>Exceeding the maximum number of allowed MAC addresses</li>
+                        <li>Replacing a device with a new one (different MAC address)</li>
+                        <li>Connecting a hub or unmanaged switch to a secure port</li>
+                        <li>Misconfigured port security settings</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/port-security-topology.png" alt="Port Security Network Topology" class="img-large">
+                    <div class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>1x Cisco 2960-24TT Switch (Switch0)</li>
+                            <li>3x Client PCs (PC0, PC1, PC2)</li>
+                        </ul>
+                        <h3>Network Design:</h3>
+                        <ul>
+                            <li>PC0 connected to FastEthernet0/1</li>
+                            <li>PC1 connected to FastEthernet0/2</li>
+                            <li>PC2 initially not connected (will be used to trigger a violation)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Initial Configuration</h2>
+                <div class="config-image">
+                    <img src="../images/port-security-pc-config.png" alt="PC IP Configuration" class="img-medium">
+                    <p>PC0 is configured with IP address 192.168.1.10/24. Similar configurations are applied to PC1 (192.168.1.20/24) and PC2 (192.168.1.30/24).</p>
+                </div>
+
+                <div class="config-image">
+                    <img src="../images/port-security-config.png" alt="Port Security Configuration" class="img-medium">
+                    <div class="config-block">
+                        <pre><code>
+Switch>enable
+Switch#configure terminal
+Switch(config)#interface FastEthernet0/1
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport port-security
+Switch(config-if)#switchport port-security maximum 1
+Switch(config-if)#switchport port-security mac-address sticky
+Switch(config-if)#switchport port-security violation shutdown
+Switch(config-if)#exit
+Switch(config)#interface FastEthernet0/2
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport port-security
+Switch(config-if)#switchport port-security maximum 1
+Switch(config-if)#switchport port-security mac-address sticky
+Switch(config-if)#switchport port-security violation shutdown
+Switch(config-if)#exit</code></pre>
+                    </div>
+                    <p>Port security is configured on FastEthernet0/1 and FastEthernet0/2 with the following settings:</p>
+                    <ul>
+                        <li>Maximum of 1 MAC address allowed per port</li>
+                        <li>Sticky MAC address learning enabled (automatically learns and saves the MAC address)</li>
+                        <li>Violation mode set to shutdown (port will be disabled if a violation occurs)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Verification of Port Security</h2>
+                <div class="test-results">
+                    <h3>Initial Port Security Status:</h3>
+                    <img src="../images/port-security-verification.png" alt="Port Security Verification" class="img-medium">
+                    <div class="success-note">
+                        <p>The output shows that port security is enabled on FastEthernet0/1 and FastEthernet0/2 with the following settings:</p>
+                        <ul>
+                            <li>Maximum secure addresses: 1 per port</li>
+                            <li>Current addresses: 0 (no MAC addresses learned yet)</li>
+                            <li>Security violations: 0 (no violations yet)</li>
+                            <li>Security action: Shutdown (ports will be disabled if violations occur)</li>
+                        </ul>
+                    </div>
+
+                    <h3>MAC Address Learning:</h3>
+                    <img src="../images/port-security-learned-mac.png" alt="Port Security Learned MAC Addresses" class="img-medium">
+                    <div class="success-note">
+                        <p>After PC0 and PC1 communicate on the network, the switch learns their MAC addresses:</p>
+                        <ul>
+                            <li>FastEthernet0/1: MAC address 0030.F280.9748 (PC0) learned as SecureSticky</li>
+                            <li>FastEthernet0/2: MAC address 0060.A3A7.CC14 (PC1) learned as SecureSticky</li>
+                        </ul>
+                        <p>These MAC addresses are now "sticky" and only these specific devices can connect to their respective ports.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Problem Demonstration</h2>
+                <div class="test-results">
+                    <h3>Port Security Violation:</h3>
+                    <img src="../images/port-security-violation.png" alt="Port Security Violation" class="img-medium">
+                    <div class="warning-note">
+                        <p>When PC2 (with MAC address 0010.1159.6A52) is connected to FastEthernet0/2 (which was previously used by PC1):</p>
+                        <ul>
+                            <li>PC2 cannot ping PC0 (100% packet loss)</li>
+                            <li>FastEthernet0/2 shows "err-disabled" status (automatically disabled)</li>
+                            <li>Port security status shows "Secure-shutdown"</li>
+                            <li>Security violation count: 1</li>
+                            <li>Last source address that caused the violation: 0010.1159.6A52 (PC2's MAC address)</li>
+                        </ul>
+                        <p>This demonstrates that port security has detected an unauthorized MAC address and disabled the port as configured.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Solution Steps</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Identify the Port Security Violation</h4>
+                        <p>First, identify which port is experiencing the security violation:</p>
+                        <div class="config-block">
+                            <pre><code>
+Switch#show interfaces status
+Switch#show port-security interface FastEthernet0/2</code></pre>
+                        </div>
+                        <p>These commands show that FastEthernet0/2 is in "err-disabled" state due to a port security violation.</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: Determine the Cause of the Violation</h4>
+                        <p>Check the port security details to understand what caused the violation:</p>
+                        <div class="config-block">
+                            <pre><code>
+Switch#show port-security interface FastEthernet0/2</code></pre>
+                        </div>
+                        <p>The output shows that a device with MAC address 0010.1159.6A52 (PC2) attempted to connect to the port, which was secured for a different MAC address (PC1's MAC address).</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: Resolve the Violation</h4>
+                        <p>To recover from the port security violation, you need to manually re-enable the port:</p>
+                        <div class="config-block">
+                            <pre><code>
+Switch#configure terminal
+Switch(config)#interface FastEthernet0/2
+Switch(config-if)#shutdown
+Switch(config-if)#no shutdown
+Switch(config-if)#exit</code></pre>
+                        </div>
+                        <p>This "shutdown/no shutdown" cycle resets the port and clears the error-disabled state.</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 4: Adjust Port Security Configuration (if needed)</h4>
+                        <p>Depending on the situation, you might need to adjust the port security configuration:</p>
+                        <ul>
+                            <li>To allow the new device (PC2) to use the port:</li>
+                        </ul>
+                        <div class="config-block">
+                            <pre><code>
+Switch(config)#interface FastEthernet0/2
+Switch(config-if)#no switchport port-security mac-address sticky
+Switch(config-if)#switchport port-security mac-address sticky
+Switch(config-if)#exit</code></pre>
+                        </div>
+                        <p>This clears the previous sticky MAC address and allows the port to learn a new MAC address.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Verification and Testing</h2>
+                <div class="test-results">
+                    <h3>Successful Recovery:</h3>
+                    <img src="../images/port-security-recovery.png" alt="Port Security Recovery" class="img-medium">
+                    <div class="success-note">
+                        <p>After resolving the port security violation:</p>
+                        <ul>
+                            <li>FastEthernet0/2 is now in "connected" state (no longer err-disabled)</li>
+                            <li>Port security status shows "Secure-up" (port is secure and operational)</li>
+                            <li>Security violation count has been reset to 0</li>
+                            <li>The port has learned the new MAC address (PC2's MAC address)</li>
+                        </ul>
+                        <p>The port is now operational and secured with the new MAC address.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Common Port Security Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> Port in err-disabled state due to security violation
+                            <br><strong>Solution:</strong> Use "shutdown" followed by "no shutdown" to recover the port</li>
+                        
+                        <li><strong>Issue:</strong> Need to allow a new device on a secure port
+                            <br><strong>Solution:</strong> Clear the current MAC address and allow the port to learn a new one</li>
+                        
+                        <li><strong>Issue:</strong> Multiple devices need to connect to a secure port
+                            <br><strong>Solution:</strong> Increase the maximum number of allowed MAC addresses</li>
+                        
+                        <li><strong>Issue:</strong> Frequent security violations
+                            <br><strong>Solution:</strong> Consider changing the violation mode from "shutdown" to "restrict" or "protect"</li>
+                    </ul>
+
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show port-security</code> - View port security settings for all interfaces</li>
+                            <li><code>show port-security interface [interface-name]</code> - View port security details for a specific interface</li>
+                            <li><code>show port-security address</code> - View all secure MAC addresses</li>
+                            <li><code>show interfaces status</code> - Check the status of all interfaces</li>
+                            <li><code>show interfaces [interface-name] status</code> - Check the status of a specific interface</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Best Practices</h2>
+                <div class="problem-description">
+                    <ul>
+                        <li>Use port security on access ports that connect to end devices</li>
+                        <li>Set appropriate violation modes based on security requirements:
+                            <ul>
+                                <li><strong>shutdown:</strong> Highest security, disables the port on violation</li>
+                                <li><strong>restrict:</strong> Medium security, drops packets from unauthorized MAC addresses and logs violations</li>
+                                <li><strong>protect:</strong> Lowest security, silently drops packets from unauthorized MAC addresses</li>
+                            </ul>
+                        </li>
+                        <li>Use sticky MAC address learning for convenience and security</li>
+                        <li>Document secured ports and their associated MAC addresses</li>
+                        <li>Consider using DHCP snooping and dynamic ARP inspection alongside port security</li>
+                        <li>Regularly review port security logs and violations</li>
+                                                <li>Implement port security as part of a comprehensive network security strategy</li>
+                        <li>Train IT staff on proper port security management procedures</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice this configuration:</p>
+                    <a href="../packet-tracer/port-security.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

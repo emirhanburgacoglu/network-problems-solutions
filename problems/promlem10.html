@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Server Issues | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html" class="active">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>Network Authentication and Access Control Issues</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 2 (Data Link) / Layer 7 (Application)</span>
+                    <span class="difficulty">Difficulty: Advanced</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>Network authentication ensures that only authorized devices can access network resources. This scenario demonstrates MAC-based port security authentication where devices are denied access if their MAC addresses are not in the allowed list. This is a common first line of defense in network security.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Legitimate devices unable to connect to the network</li>
+                        <li>No network connectivity despite correct IP configuration</li>
+                        <li>Port security violations in switch logs</li>
+                        <li>Intermittent connectivity issues</li>
+                        <li>New devices cannot access network resources</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>MAC address not registered in authentication database</li>
+                        <li>Incorrect MAC address configured on switch port</li>
+                        <li>Port security misconfiguration</li>
+                        <li>Maximum MAC addresses limit reached</li>
+                        <li>Authentication server connectivity issues</li>
+                        <li>Expired or invalid credentials</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/authentication-topology.png" alt="Authentication Network Topology" class="img-large">
+                    <div class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>1x Cisco 2911 Router (Router0)</li>
+                            <li>1x Cisco 2960-24TT Switch (Switch0)</li>
+                            <li>1x Generic Server (Server0 - Authentication Server)</li>
+                            <li>2x Client PCs (PC0, PC1)</li>
+                        </ul>
+                        <h3>Network Design:</h3>
+                        <ul>
+                            <li>Server Network: 192.168.10.0/24</li>
+                            <li>Client Network: 192.168.1.0/24</li>
+                            <li>Router acts as gateway between networks</li>
+                            <li>Switch enforces MAC-based authentication</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Initial Configuration</h2>
+                <div class="config-image">
+                    <h3>Server Configuration:</h3>
+                    <img src="../images/authentication-server-ip-config.png" alt="Server IP Configuration" class="img-medium">
+                    <p>Authentication Server configured with IP address 192.168.10.10/24</p>
+                </div>
+
+                <div class="config-image">
+                    <h3>PC0 Configuration:</h3>
+                    <img src="../images/authentication-pc0-ip-config.png" alt="PC0 IP Configuration" class="img-medium">
+                    <p>PC0 configured with IP address 192.168.1.10/24</p>
+                </div>
+
+                <div class="config-block">
+                    <h3>Router Configuration:</h3>
+                    <pre><code>interface GigabitEthernet0/0
+ ip address 192.168.10.1 255.255.255.0
+ no shutdown
+!
+interface GigabitEthernet0/1
+ ip address 192.168.1.1 255.255.255.0
+ no shutdown</code></pre>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Initial Connectivity Test</h2>
+                <div class="test-results">
+                    <h3>PC to PC Communication:</h3>
+                    <img src="../images/authentication-initial-ping.png" alt="Initial Ping Test" class="img-medium">
+                    <div class="success-note">
+                        <p>Initial connectivity between PC0 and PC1 is successful before implementing port security.</p>
+                    </div>
+
+                    <h3>PC to Server Communication:</h3>
+                    <img src="../images/authentication-pc-to-server-ping.png" alt="PC to Server Ping" class="img-medium">
+                    <div class="success-note">
+                        <p>PC0 can successfully reach the authentication server, confirming routing is working correctly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Port Security Configuration</h2>
+                <div class="test-results">
+                    <h3>MAC-Based Authentication Setup:</h3>
+                    <img src="../images/authentication-port-security-config.png" alt="Port Security Configuration" class="img-medium">
+                    <div class="config-block">
+                        <pre><code>interface FastEthernet0/1
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 1
+ switchport port-security mac-address sticky
+ switchport port-security violation shutdown
+!
+interface FastEthernet0/2
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 1
+ switchport port-security mac-address 0000.0000.0001
+ switchport port-security violation restrict</code></pre>
+                    </div>
+                    <div class="warning-note">
+                        <p>Port security is configured with:</p>
+                        <ul>
+                            <li>Fa0/1: Dynamic MAC learning (sticky) for PC0</li>
+                            <li>Fa0/2: Static MAC address that doesn't match PC1's actual MAC</li>
+                            <li>This will cause PC1 to be denied network access</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Authentication Problem Demonstration</h2>
+                <div class="test-results">
+                    <h3>PC1 Access Denied:</h3>
+                    <img src="../images/authentication-denied-ping.png" alt="Authentication Denied" class="img-medium">
+                    <div class="warning-note">
+                        <p>PC1 cannot access the network because its MAC address (0004.9A92.9083) doesn't match the configured allowed MAC address (0000.0000.0001).</p>
+                    </div>
+
+                    <h3>Port Security Status:</h3>
+                    <img src="../images/authentication-violation-status.png" alt="Port Security Violations" class="img-medium">
+                    <div class="problem-description">
+                        <p>The port security status shows that Fa0/2 is configured with "Restrict" action, which silently drops packets from unauthorized MAC addresses without shutting down the port.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Solution Steps</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Identify the Denied Device's MAC Address</h4>
+                        <p>Check the actual MAC address of PC1:</p>
+                        <ul>
+                            <li>Click on PC1 → Config tab</li>
+                            <li>Note the MAC Address: 0004.9A92.9083</li>
+                        </ul>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: Update Port Security Configuration</h4>
+                        <p>Configure the switch to allow PC1's actual MAC address:</p>
+                        <div class="config-block">
+                            <pre><code>Switch>enable
+Switch#configure terminal
+Switch(config)#interface fastEthernet 0/2
+Switch(config-if)#no switchport port-security mac-address 0000.0000.0001
+Switch(config-if)#switchport port-security mac-address 0004.9A92.9083
+Switch(config-if)#exit</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: Verify Configuration</h4>
+                        <p>Check that the new MAC address is configured:</p>
+                        <div class="config-block">
+                            <pre><code>Switch#show port-security interface fastEthernet 0/2</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 4: Test Connectivity</h4>
+                        <p>Verify that PC1 can now access the network:</p>
+                        <ul>
+                            <li>From PC1, ping the gateway (192.168.1.1)</li>
+                            <li>Ping other devices on the network</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Resolution Verification</h2>
+                <div class="test-results">
+                    <h3>Successful Authentication:</h3>
+                    <img src="../images/authentication-resolved-ping.png" alt="Authentication Resolved" class="img-medium">
+                    <div class="success-note">
+                        <p>After updating the allowed MAC address, PC1 can successfully access the network and communicate with other devices.</p>
+                    </div>
+
+                    <h3>Final Port Security Status:</h3>
+                    <img src="../images/authentication-final-status.png" alt="Final Port Security Status" class="img-medium">
+                    <div class="success-note">
+                        <p>Port security status shows no violations, confirming that both PCs are now properly authenticated and can access the network.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Advanced Authentication Methods</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>802.1X Authentication</h4>
+                        <p>For enterprise environments, implement 802.1X:</p>
+                        <div class="config-block">
+                            <pre><code>Switch(config)#aaa new-model
+Switch(config)#aaa authentication dot1x default group radius
+Switch(config)#dot1x system-auth-control
+Switch(config)#interface range fa0/1-24
+Switch(config-if-range)#dot1x port-control auto</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>RADIUS Server Configuration</h4>
+                        <p>Configure RADIUS server for centralized authentication:</p>
+                        <div class="config-block">
+                            <pre><code>Switch(config)#radius-server host 192.168.10.10 key cisco123
+Switch(config)#radius-server timeout 10
+Switch(config)#radius-server retransmit 3</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Dynamic VLAN Assignment</h4>
+                        <p>Assign VLANs based on authentication:</p>
+                        <div class="config-block">
+                            <pre><code>Switch(config)#interface fa0/1
+Switch(config-if)#switchport mode access
+Switch(config-if)#dot1x pae authenticator
+Switch(config-if)#dot1x timeout quiet-period 10</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Common Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> Device cannot connect despite correct credentials
+                            <br><strong>Solution:</strong> Check MAC address filtering and ensure device is in allowed list</li>
+                        
+                        <li><strong>Issue:</strong> Port goes into err-disabled state
+                            <br><strong>Solution:</strong> Clear port security violations and reconfigure with correct MAC</li>
+                        
+                        <li><strong>Issue:</strong> Intermittent authentication failures
+                            <br><strong>Solution:</strong> Check RADIUS server connectivity and timeout settings</li>
+                        
+                        <li><strong>Issue:</strong> New devices cannot be added
+                            <br><strong>Solution:</strong> Increase maximum MAC addresses allowed or use dynamic learning</li>
+                    </ul>
+
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show port-security</code> - Display port security summary</li>
+                            <li><code>show port-security interface [interface]</code> - Check specific port security</li>
+                            <li><code>show port-security address</code> - View secure MAC addresses</li>
+                            <li><code>show dot1x all</code> - Display 802.1X status</li>
+                            <li><code>show authentication sessions</code> - View active authentication sessions</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Best Practices</h2>
+                <div class="problem-description">
+                    <ul>
+                        <li>Implement 802.1X for scalable enterprise authentication</li>
+                        <li>Use RADIUS/TACACS+ for centralized authentication management</li>
+                        <li>Enable port security on all access ports</li>
+                        <li>Configure appropriate violation modes based on security requirements</li>
+                        <li>Implement MAC address bypass (MAB) for non-802.1X devices</li>
+                        <li>Use dynamic VLAN assignment for network segmentation</li>
+                        <li>Monitor authentication logs regularly</li>
+                        <li>Implement guest VLAN for unauthorized devices</li>
+                        <li>Configure authentication timers appropriately</li>
+                                                <li>Document all static MAC address assignments</li>
+                        <li>Regularly audit and update authentication policies</li>
+                        <li>Implement redundant authentication servers</li>
+                        <li>Use certificate-based authentication for higher security</li>
+                        <li>Enable accounting for authentication events</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Security Considerations</h2>
+                <div class="problem-description">
+                    <h3>Additional Security Measures:</h3>
+                    <ul>
+                        <li>Enable DHCP snooping to prevent rogue DHCP servers</li>
+                        <li>Implement Dynamic ARP Inspection (DAI)</li>
+                        <li>Use IP Source Guard to prevent IP spoofing</li>
+                        <li>Configure storm control to prevent DoS attacks</li>
+                        <li>Enable BPDU Guard on access ports</li>
+                        <li>Implement private VLANs for additional isolation</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice authentication configuration and troubleshooting:</p>
+                    <a href="../packet-tracer/authentication-issues.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

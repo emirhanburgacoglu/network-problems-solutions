@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLAN Routing Issue | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html" class="active">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>VLAN Routing Issue</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 2/3</span>
+                    <span class="difficulty">Difficulty: Medium</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>Inter-VLAN routing problems occur when devices in different VLANs cannot communicate with each other despite being physically connected to the same network. This Layer 2/3 issue affects network segmentation and cross-VLAN communication.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Devices in different VLANs cannot ping each other</li>
+                        <li>Intra-VLAN communication works but inter-VLAN fails</li>
+                        <li>Default gateway unreachable from VLANs</li>
+                        <li>Trunk ports not carrying VLAN traffic</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>Incorrect VLAN configuration on switch ports</li>
+                        <li>Misconfigured trunk links</li>
+                        <li>Improper router subinterface setup</li>
+                        <li>Wrong IP addressing scheme</li>
+                        <li>Missing VLAN encapsulation</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/vlan-topology.png" alt="VLAN Network Topology" class="img-large">
+                    <div class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>1x Cisco 2911 Router</li>
+                            <li>1x Cisco 2960 Switch</li>
+                            <li>4x End Devices (2 in VLAN 10, 2 in VLAN 20)</li>
+                            <li>VLAN 10: Engineering Department</li>
+                            <li>VLAN 20: Sales Department</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Configuration Steps</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Switch VLAN Configuration</h4>
+                        <div class="config-image">
+                            <img src="../images/switch-config.png" alt="Switch VLAN Configuration" class="img-medium">
+                            <div class="config-block">
+                                <pre><code>
+! Create and configure VLANs
+Switch>enable
+Switch#configure terminal
+Switch(config)#vlan 10
+Switch(config-vlan)#name Engineering
+Switch(config)#vlan 20
+Switch(config-vlan)#name Sales
+
+! Configure access ports
+Switch(config)#interface range fa0/2-3
+Switch(config-if-range)#switchport mode access
+Switch(config-if-range)#switchport access vlan 10
+
+Switch(config)#interface range fa0/4-5
+Switch(config-if-range)#switchport mode access
+Switch(config-if-range)#switchport access vlan 20
+
+! Configure trunk port
+Switch(config)#interface gig0/1
+Switch(config-if)#switchport mode trunk
+Switch(config-if)#switchport trunk allowed vlan 1,10,20</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: Router Configuration</h4>
+                        <div class="config-image">
+                            <img src="../images/router-config.png" alt="Router Interface Configuration" class="img-medium">
+                            <div class="config-block">
+                                <pre><code>
+Router>enable
+Router#configure terminal
+! Configure main interface
+Router(config)#interface GigabitEthernet0/0
+Router(config-if)#no shutdown
+
+! Configure VLAN 10 subinterface
+Router(config)#interface GigabitEthernet0/0.10
+Router(config-subif)#encapsulation dot1q 10
+Router(config-subif)#ip address 192.168.10.1 255.255.255.0
+
+! Configure VLAN 20 subinterface
+Router(config)#interface GigabitEthernet0/0.20
+Router(config-subif)#encapsulation dot1q 20
+Router(config-subif)#ip address 192.168.20.1 255.255.255.0</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: Verification</h4>
+                        <div class="test-results">
+                            <img src="../images/ping-tests.png" alt="Inter-VLAN Ping Tests" class="img-medium">
+                            <div class="success-note">
+                                <p>Successful ping tests between VLANs show:</p>
+                                <ul>
+                                    <li>VLAN 10 to VLAN 20 connectivity</li>
+                                    <li>0% packet loss</li>
+                                    <li>Low latency (1ms response time)</li>
+                                    <li>Proper inter-VLAN routing</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show vlan brief</code> - Verify VLAN creation and port assignments</li>
+                            <li><code>show interface trunk</code> - Check trunk configuration</li>
+                            <li><code>show ip interface brief</code> - Verify interface status</li>
+                            <li><code>show running-config interface</code> - Review interface settings</li>
+                        </ul>
+                    </div>
+
+                    <h3>Common Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> VLANs not appearing in show vlan brief
+                            <br><strong>Solution:</strong> Verify VLAN creation and ensure they're active</li>
+                        
+                        <li><strong>Issue:</strong> Trunk port not forwarding VLANs
+                            <br><strong>Solution:</strong> Check allowed VLANs on trunk</li>
+                        
+                        <li><strong>Issue:</strong> Subinterfaces not coming up
+                            <br><strong>Solution:</strong> Verify encapsulation and main interface status</li>
+                        
+                        <li><strong>Issue:</strong> Cannot ping between VLANs
+                            <br><strong>Solution:</strong> Check IP addressing and gateway configuration</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice this configuration:</p>
+                    <a href="../packet-tracer/vlan-routing.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

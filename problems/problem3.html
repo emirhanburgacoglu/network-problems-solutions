@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS Resolution Issue | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html" class="active">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>DNS Resolution Issue</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 7 (Application)</span>
+                    <span class="difficulty">Difficulty: Medium</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>DNS resolution problems occur when network devices cannot convert domain names to IP addresses. This Layer 7 issue prevents users from accessing network resources using domain names, forcing them to use IP addresses directly or resulting in connection failures.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Unable to resolve domain names to IP addresses</li>
+                        <li>"Could not find host" errors when using domain names</li>
+                        <li>DNS server unreachable messages</li>
+                        <li>Slow network response when accessing websites</li>
+                        <li>Applications failing to connect using domain names</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>DNS server service not running</li>
+                        <li>Incorrect DNS server configuration</li>
+                        <li>Missing or incorrect DNS records</li>
+                        <li>Network connectivity issues to DNS server</li>
+                        <li>Misconfigured client DNS settings</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/dns-topology.png" alt="DNS Network Topology" class="img-large">
+                    <div class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>1x Cisco 2911 Router (Gateway)</li>
+                            <li>1x Cisco 2960 Switch</li>
+                            <li>1x DNS Server</li>
+                            <li>2x Client PCs</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Configuration Steps</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Router Configuration</h4>
+                        <div class="config-image">
+                            <img src="../images/dns-router-config.png" alt="Router Configuration" class="img-medium">
+                            <div class="config-block">
+                                <pre><code>
+Router>enable
+Router#configure terminal
+Router(config)#interface GigabitEthernet0/0
+Router(config-if)#ip address 192.168.1.1 255.255.255.0
+Router(config-if)#no shutdown</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: DNS Server Setup</h4>
+                        <div class="config-image">
+                            <img src="../images/dns-server-ip-config.png" alt="DNS Server IP Configuration" class="img-medium">
+                            <p>Configure DNS Server IP settings:</p>
+                            <ul>
+                                <li>IP Address: 192.168.1.2</li>
+                                <li>Subnet Mask: 255.255.255.0</li>
+                                <li>Default Gateway: 192.168.1.1</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: DNS Service Configuration</h4>
+                        <div class="config-image">
+                            <img src="../images/dns-server-config.png" alt="DNS Server Configuration" class="img-medium">
+                            <p>Configure DNS records:</p>
+                            <ul>
+                                <li>example.com -> 192.168.1.2</li>
+                                <li>www.example.com -> 192.168.1.2</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 4: Client Configuration</h4>
+                        <div class="config-image">
+                            <img src="../images/dns-pc-config.png" alt="PC Configuration" class="img-medium">
+                            <p>Configure client PCs:</p>
+                            <ul>
+                                <li>IP Address: 192.168.1.10/11</li>
+                                <li>Subnet Mask: 255.255.255.0</li>
+                                <li>Default Gateway: 192.168.1.1</li>
+                                <li>DNS Server: 192.168.1.2</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Problem Demonstration and Solution</h2>
+                <div class="test-results">
+                    <h3>Failed DNS Resolution:</h3>
+                    <img src="../images/dns-failure.png" alt="DNS Resolution Failure" class="img-medium">
+                    <div class="warning-note">
+                        <p>When DNS service is disabled, domain name resolution fails with "could not find host" error.</p>
+                    </div>
+
+                    <h3>Successful Resolution:</h3>
+                    <img src="../images/dns-success.png" alt="Successful DNS Resolution" class="img-medium">
+                    <div class="success-note">
+                        <p>After enabling DNS service and proper configuration, domain names resolve successfully.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Common Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> DNS service not running
+                            <br><strong>Solution:</strong> Verify DNS service status and enable if needed</li>
+                        
+                        <li><strong>Issue:</strong> Incorrect DNS records
+                            <br><strong>Solution:</strong> Verify DNS record entries and correct any mistakes</li>
+                        
+                        <li><strong>Issue:</strong> Client cannot reach DNS server
+                            <br><strong>Solution:</strong> Check network connectivity and DNS server IP configuration</li>
+                        
+                        <li><strong>Issue:</strong> Wrong DNS server address on clients
+                            <br><strong>Solution:</strong> Verify client DNS settings match the DNS server IP</li>
+                    </ul>
+
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>ping [domain-name]</code> - Test DNS resolution</li>
+                            <li><code>ipconfig /all</code> - Verify DNS server settings</li>
+                            <li><code>nslookup [domain-name]</code> - Test DNS queries</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice this configuration:</p>
+                    <a href="../packet-tracer/dns-problem.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

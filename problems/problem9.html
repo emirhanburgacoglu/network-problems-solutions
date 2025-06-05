@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redundant Link Failure | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html" class="active">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>Redundant Link Failure and STP Recovery</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 2 (Data Link)</span>
+                    <span class="difficulty">Difficulty: Advanced</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>Redundant links provide network reliability by creating backup paths between switches. However, without proper loop prevention mechanisms like Spanning Tree Protocol (STP), these redundant links can cause broadcast storms and network instability. This scenario demonstrates how STP manages redundant links and automatically recovers from link failures.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Network loops causing broadcast storms without STP</li>
+                        <li>Temporary connectivity loss during STP reconvergence</li>
+                        <li>Unpredictable traffic paths in redundant topologies</li>
+                        <li>MAC address table instability</li>
+                        <li>High CPU utilization on switches during topology changes</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>Physical link failures in network infrastructure</li>
+                        <li>Improper STP configuration or disabled STP</li>
+                        <li>Mismatched STP modes between switches</li>
+                        <li>Incorrect root bridge selection</li>
+                        <li>Slow STP convergence times</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/redundant-link-topology.png" alt="Redundant Link Network Topology" class="img-large">
+                    <div class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>3x Cisco 2960-24TT Switches (Switch0, Switch1, Switch2)</li>
+                            <li>2x Client PCs (PC0, PC1)</li>
+                            <li>Redundant links between all switches</li>
+                        </ul>
+                        <h3>Network Design:</h3>
+                        <ul>
+                            <li>Full mesh topology with redundant paths</li>
+                            <li>PC0 connected to Switch0 (Fa0/1)</li>
+                            <li>PC1 connected to Switch2 (Fa0/1)</li>
+                            <li>Each switch pair connected with dual links for redundancy</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Initial Configuration</h2>
+                <div class="config-image">
+                    <h3>PC0 Configuration:</h3>
+                    <img src="../images/redundant-ip-config.png" alt="PC0 IP Configuration" class="img-medium">
+                    <p>PC0 is configured with IP address 192.168.1.10/24</p>
+                </div>
+
+                
+            </section>
+
+            <section class="problem-section">
+                <h2>STP Initial State</h2>
+                <div class="test-results">
+                    <h3>Spanning Tree Protocol Status:</h3>
+                    <img src="../images/redundant-initial-stp-status.png" alt="Initial STP Status" class="img-medium">
+                    <div class="success-note">
+                        <p>Initial STP configuration shows:</p>
+                        <ul>
+                            <li>Root Bridge ID: 0001.42C2.832A (Switch1 is the root bridge)</li>
+                            <li>All ports on Switch0 are in Designated/Forwarding state</li>
+                            <li>STP is preventing loops by blocking redundant paths on other switches</li>
+                            <li>Hello Time: 2 sec, Max Age: 20 sec, Forward Delay: 15 sec</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Connectivity Verification</h2>
+                <div class="test-results">
+                    <h3>Initial Connectivity Test:</h3>
+                    <img src="../images/redundant-ping-test-success.png" alt="Initial Ping Test" class="img-medium">
+                    <div class="success-note">
+                        <p>Ping from PC0 (192.168.1.10) to PC1 (192.168.1.20) is successful with 0% packet loss, confirming that the network is functioning properly with STP managing the redundant links.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Link Failure Simulation</h2>
+                <div class="problem-description">
+                    <h3>Simulating Link Failure:</h3>
+                    <p>To demonstrate the benefit of redundant links and STP's automatic recovery capability, we simulate a link failure by disconnecting one of the active links between Switch0 and Switch2.</p>
+                    
+                    <h3>Expected Behavior:</h3>
+                    <ul>
+                        <li>STP detects the topology change</li>
+                        <li>Previously blocked ports transition to forwarding state</li>
+                        <li>Network connectivity is maintained through alternate paths</li>
+                        <li>Brief interruption during STP reconvergence (30-50 seconds with default timers)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Post-Failure Verification</h2>
+                <div class="test-results">
+                    <h3>Connectivity After Link Failure:</h3>
+                    <img src="../images/redundant-link-failure-ping.png" alt="Ping After Link Failure" class="img-medium">
+                    <div class="success-note">
+                        <p>Even after removing one link, connectivity between PC0 and PC1 is maintained. STP automatically activated an alternate path, demonstrating the value of redundant links.</p>
+                    </div>
+
+                    <h3>STP Status After Failure:</h3>
+                    <img src="../images/redundant-stp-after-failure.png" alt="STP Status After Failure" class="img-medium">
+                    <div class="warning-note">
+                        <p>STP has adapted to the topology change:</p>
+                        <ul>
+                            <li>Root Bridge remains the same (0001.42C2.832A)</li>
+                            <li>Port roles have been recalculated</li>
+                            <li>Previously blocked ports may now be forwarding</li>
+                            <li>Network has converged to a new loop-free topology</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Solution and Best Practices</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Implement Rapid Spanning Tree Protocol (RSTP)</h4>
+                        <p>For faster convergence, configure RSTP on all switches:</p>
+                        <div class="config-block">
+                            <pre><code>Switch(config)#spanning-tree mode rapid-pvst
+Switch(config)#exit</code></pre>
+                        </div>
+                        <p>RSTP provides convergence times of less than 1 second compared to 30-50 seconds with traditional STP.</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: Configure Root Bridge Priority</h4>
+                        <p>Manually set the root bridge for predictable behavior:</p>
+                        <div class="config-block">
+                            <pre><code>Switch1(config)#spanning-tree vlan 1 priority 4096
+Switch0(config)#spanning-tree vlan 1 priority 8192
+Switch2(config)#spanning-tree vlan 1 priority 12288</code></pre>
+                        </div>
+                        <p>Lower priority values have higher preference for root bridge election.</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: Configure PortFast on Access Ports</h4>
+                        <p>Enable PortFast on ports connected to end devices:</p>
+                        <div class="config-block">
+                            <pre><code>Switch(config)#interface fastEthernet 0/1
+Switch(config-if)#spanning-tree portfast
+Switch(config-if)#exit</code></pre>
+                        </div>
+                        <p>PortFast allows access ports to transition immediately to forwarding state.</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 4: Implement Link Aggregation</h4>
+                        <p>For better bandwidth utilization, configure EtherChannel:</p>
+                        <div class="config-block">
+                            <pre><code>Switch(config)#interface range fa0/2-3
+Switch(config-if-range)#channel-group 1 mode active
+Switch(config-if-range)#exit</code></pre>
+                        </div>
+                        <p>EtherChannel bundles multiple physical links into one logical link.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Common Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> Slow network recovery after link failure
+                            <br><strong>Solution:</strong> Implement RSTP instead of traditional STP</li>
+                        
+                        <li><strong>Issue:</strong> Unpredictable root bridge selection
+                            <br><strong>Solution:</strong> Manually configure bridge priorities</li>
+                        
+                        <li><strong>Issue:</strong> Broadcast storms in redundant topology
+                            <br><strong>Solution:</strong> Ensure STP is enabled on all switches</li>
+                        
+                        <li><strong>Issue:</strong> Suboptimal traffic paths
+                            <br><strong>Solution:</strong> Adjust port costs to influence path selection</li>
+                    </ul>
+
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show spanning-tree</code> - Display STP configuration and status</li>
+                            <li><code>show spanning-tree summary</code> - View STP summary information</li>
+                            <li><code>show spanning-tree interface [interface]</code> - Check specific port STP status</li>
+                            <li><code>show spanning-tree root</code> - Display root bridge information</li>
+                            <li><code>debug spanning-tree events</code> - Monitor STP topology changes</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Best Practices</h2>
+                <div class="problem-description">
+                    <ul>
+                        <li>Always enable STP in networks with redundant paths</li>
+                        <li>Use RSTP or MST for faster convergence</li>
+                        <li>Document the intended root bridge and backup root bridge</li>
+                        <li>Configure root bridge priority explicitly</li>
+                        <li>Use PortFast on access ports but never on trunk ports</li>
+                        <li>Implement BPDU Guard on access ports for security</li>
+                        <li>Monitor STP topology changes and investigate unexpected changes</li>
+                        <li>Consider link aggregation for better bandwidth utilization</li>
+                        <li>Test failover scenarios during maintenance windows</li>
+                        <li>Keep STP timers consistent across all switches</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice redundant link configuration and STP behavior:</p>
+                    <a href="../packet-tracer/redundant-link.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

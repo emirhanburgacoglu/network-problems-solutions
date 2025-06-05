@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACL Configuration Issues | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html" class="active">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>ACL Configuration Issues</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 3 (Network)</span>
+                    <span class="difficulty">Difficulty: Medium</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>Access Control Lists (ACLs) are powerful tools for controlling network traffic, but incorrect ACL configurations can lead to unexpected network behavior. This Layer 3 issue occurs when ACLs are improperly configured, resulting in either too restrictive or too permissive traffic filtering.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Specific hosts unable to access network resources</li>
+                        <li>Traffic being blocked that should be allowed</li>
+                        <li>Traffic being allowed that should be blocked</li>
+                        <li>Intermittent connectivity issues</li>
+                        <li>One-way communication (can send but not receive, or vice versa)</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>Incorrect ACL direction (in vs. out)</li>
+                        <li>Overly restrictive ACL entries</li>
+                        <li>Missing permit statements</li>
+                        <li>Incorrect order of ACL entries</li>
+                        <li>Applying ACLs to the wrong interface</li>
+                        <li>Forgetting the implicit "deny all" at the end of ACLs</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/acl-topology.png" alt="ACL Issues Network Topology" class="img-large">
+                    <div class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>1x Cisco 2911 Router (Router0)</li>
+                            <li>1x Cisco 2960-24TT Switch (Switch0)</li>
+                            <li>3x Client PCs (PC0, PC1, PC2)</li>
+                            <li>1x Cloud (representing external network)</li>
+                        </ul>
+                        <h3>IP Addressing:</h3>
+                        <ul>
+                            <li>Router0 GigabitEthernet0/0: 192.168.1.1/24 (internal network)</li>
+                            <li>Router0 GigabitEthernet0/1: 203.0.113.1/24 (external network)</li>
+                            <li>PC0: 192.168.1.10/24</li>
+                            <li>PC1: 192.168.1.20/24</li>
+                            <li>PC2: 192.168.1.30/24</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Router Configuration</h2>
+                <div class="config-image">
+                    <img src="../images/acl-router-config.png" alt="Router IP Configuration" class="img-medium">
+                    <div class="config-block">
+                        <pre><code>
+Router>enable
+Router#configure terminal
+Router(config)#interface GigabitEthernet0/0
+Router(config-if)#ip address 192.168.1.1 255.255.255.0
+Router(config-if)#no shutdown
+Router(config-if)#exit
+Router(config)#interface GigabitEthernet0/1
+Router(config-if)#ip address 203.0.113.1 255.255.255.0
+Router(config-if)#no shutdown
+Router(config-if)#exit</code></pre>
+                    </div>
+                </div>
+                <div class="config-image">
+                    <img src="../images/acl-pc-config.png" alt="PC IP Configuration" class="img-medium">
+                    <p>PC configuration with static IP addresses and default gateway pointing to Router0's internal interface.</p>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Problem Demonstration</h2>
+                <div class="test-results">
+                    <h3>Incorrect ACL Configuration:</h3>
+                    <img src="../images/acl-wrong-config.png" alt="Incorrect ACL Configuration" class="img-medium">
+                    <div class="warning-note">
+                        <p>The ACL is incorrectly configured with the following issues:</p>
+                        <ul>
+                            <li>ACL 100 denies all traffic from PC1 (192.168.1.20) to any destination</li>
+                            <li>The ACL is applied in the outbound direction (out) on the GigabitEthernet0/0 interface</li>
+                            <li>This incorrect direction means the ACL filters traffic leaving the router toward the internal network, not traffic entering from PC1</li>
+                        </ul>
+                    </div>
+
+                    <h3>Connectivity Test Results:</h3>
+                    <div class="config-image">
+                        <img src="../images/acl-verification.png" alt="Ping Tests Between PCs" class="img-medium">
+                        <p>Despite the ACL being configured to block PC1's traffic, PC1 can still communicate with PC2 because the ACL is applied in the wrong direction.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Solution Steps</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Identify the ACL Issue</h4>
+                        <p>First, examine the current ACL configuration:</p>
+                        <div class="config-block">
+                            <pre><code>
+Router#show access-lists
+Extended IP access list 100
+    10 deny ip host 192.168.1.20 any
+    20 permit ip any any
+
+Router#show ip interface GigabitEthernet0/0
+GigabitEthernet0/0 is up, line protocol is up
+  Internet address is 192.168.1.1/24
+  Outgoing access list is 100</code></pre>
+                        </div>
+                        <p>The issue is identified: the ACL is applied in the outbound direction, which means it filters traffic leaving the router toward the internal network, not traffic entering from PC1.</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: Remove the Incorrect ACL</h4>
+                        <div class="config-block">
+                            <pre><code>
+Router#configure terminal
+Router(config)#interface GigabitEthernet0/0
+Router(config-if)#no ip access-group 100 out
+Router(config-if)#exit
+Router(config)#no access-list 100
+Router(config)#exit</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: Create a Properly Configured ACL</h4>
+                        <img src="../images/acl-correct-config.png" alt="Correct ACL Configuration" class="img-medium">
+                        <div class="config-block">
+                            <pre><code>
+Router#configure terminal
+Router(config)#access-list 100 deny ip host 192.168.1.20 host 203.0.113.1
+Router(config)#access-list 100 permit ip any any
+Router(config)#interface GigabitEthernet0/0
+Router(config-if)#ip access-group 100 in
+Router(config-if)#exit
+Router(config)#exit</code></pre>
+                        </div>
+                        <p>The corrected ACL configuration:</p>
+                        <ul>
+                            <li>Denies only traffic from PC1 (192.168.1.20) to the router's external interface (203.0.113.1)</li>
+                            <li>Permits all other traffic</li>
+                            <li>Is applied in the inbound direction (in) on the GigabitEthernet0/0 interface, which correctly filters traffic entering the router from the internal network</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Verification and Testing</h2>
+                <div class="test-results">
+                    <h3>Successful ACL Implementation:</h3>
+                    <img src="../images/acl-verification.png" alt="Successful Ping Tests" class="img-medium">
+                    <div class="success-note">
+                        <p>After implementing the correct ACL:</p>
+                        <ul>
+                            <li>PC1 can still communicate with PC2 (internal network traffic is not affected)</li>
+                            <li>PC2 can communicate with PC1 (internal network traffic is not affected)</li>
+                            <li>PC1 cannot access the router's external interface (blocked by ACL)</li>
+                            <li>PC2 can access the router's external interface (not blocked by ACL)</li>
+                        </ul>
+                        <p>This confirms that the ACL is now correctly filtering only the specific traffic we want to block.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Common ACL Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> ACL applied in wrong direction
+                            <br><strong>Solution:</strong> Remember "in" filters traffic entering the interface, "out" filters traffic leaving the interface</li>
+                        
+                        <li><strong>Issue:</strong> ACL too restrictive
+                            <br><strong>Solution:</strong> Make ACL entries more specific to target only the traffic you want to block</li>
+                        
+                        <li><strong>Issue:</strong> Missing permit statement
+                            <br><strong>Solution:</strong> Always include "permit ip any any" at the end of extended ACLs unless you want to block all other traffic</li>
+                        
+                        <li><strong>Issue:</strong> ACL entries in wrong order
+                            <br><strong>Solution:</strong> Remember ACLs are processed top-down; place more specific entries before general ones</li>
+                    </ul>
+
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show access-lists</code> - View all configured ACLs</li>
+                            <li><code>show ip interface [interface-name]</code> - Check which ACLs are applied to an interface</li>
+                            <li><code>show running-config | include access-list</code> - View all ACL configurations</li>
+                            <li><code>ping [destination-ip]</code> - Test connectivity to verify ACL effectiveness</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Best Practices</h2>
+                <div class="problem-description">
+                    <ul>
+                        <li>Always apply ACLs in the correct direction based on traffic flow</li>
+                        <li>Use extended ACLs close to the source of traffic</li>
+                        <li>Use standard ACLs close to the destination</li>
+                        <li>Document ACL purpose and entries for future reference</li>
+                        <li>Test ACL effectiveness after implementation</li>
+                        <li>Use named ACLs for better readability and management</li>
+                        <li>Be as specific as possible with ACL entries</li>
+                        <li>Remember the implicit "deny all" at the end of every ACL</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice this configuration:</p>
+                    <a href="../packet-tracer/acl-issues.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

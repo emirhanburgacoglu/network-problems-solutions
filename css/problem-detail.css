@@ -1,0 +1,255 @@
+/* Modern Admin Guide Styling */
+.problem-detail {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 30px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Header Styling */
+.problem-header {
+    border-bottom: 2px solid #eef2f6;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.problem-header h1 {
+    font-size: 28px;
+    color: #1a2b3c;
+    margin-bottom: 15px;
+}
+
+.problem-meta {
+    display: flex;
+    gap: 15px;
+}
+
+.problem-meta span {
+    background: #f8fafc;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+}
+
+/* Section Styling */
+.problem-section {
+    margin-bottom: 35px;
+}
+
+.problem-section h2 {
+    color: #2d3748;
+    font-size: 22px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.problem-section h3 {
+    color: #4a5568;
+    font-size: 18px;
+    margin: 20px 0 15px;
+}
+
+/* Configuration Blocks */
+.config-block {
+    background: #1a202c;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.config-block pre {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.config-block code {
+    color: #e2e8f0;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Network Diagrams */
+.topology-container {
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.topology-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+}
+
+/* Verification Steps */
+.verification-steps {
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.verification-steps ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.verification-steps li {
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.verification-steps li:last-child {
+    border-bottom: none;
+}
+
+/* Command Highlights */
+.command {
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+}
+
+/* Results Display */
+.test-results {
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.test-results img {
+    max-width: 100%;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+/* Download Button */
+.download-btn {
+    display: inline-block;
+    background: #4299e1;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+}
+
+/* Image Sizes */
+.img-small {
+    max-width: 400px;
+}
+
+.img-medium {
+    max-width: 600px;
+}
+
+.img-large {
+    max-width: 800px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .problem-detail {
+        padding: 20px;
+    }
+
+    .problem-meta {
+        flex-direction: column;
+    }
+
+    .config-block {
+        padding: 15px;
+    }
+
+    .config-block code {
+        font-size: 13px;
+    }
+}
+/* Problem Description Styling */
+.problem-description {
+    background: #f8f9fa;
+    border-left: 4px solid #4299e1;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+}
+
+.solution-steps {
+    margin: 20px 0;
+}
+
+.solution-step {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.solution-step h4 {
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.warning-note {
+    background: #fff3cd;
+    border-left: 4px solid #fbbf24;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 0 6px 6px 0;
+}
+
+.success-note {
+    background: #d1fae5;
+    border-left: 4px solid #34d399;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 0 6px 6px 0;
+}
+
+.troubleshooting-tips {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.troubleshooting-tips ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.troubleshooting-tips li {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.troubleshooting-tips li:before {
+    content: "•";
+    color: #4299e1;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadcast Storm | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html">Routing Loop</a>
+                <a href="problem5.html" class="active">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>Broadcast Storm Issue</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 2 (Data Link)</span>
+                    <span class="difficulty">Difficulty: High</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>A broadcast storm occurs when a network is overwhelmed with broadcast packets that flood the network, consuming bandwidth and processing resources. This Layer 2 issue can severely degrade network performance or even cause a complete network outage as devices become unable to process legitimate traffic.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Extremely slow network performance</li>
+                        <li>High CPU utilization on network devices</li>
+                        <li>Network timeouts and connection failures</li>
+                        <li>Intermittent connectivity issues</li>
+                        <li>Excessive broadcast traffic visible in network monitoring tools</li>
+                        <li>Network devices becoming unresponsive</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>Network loops (physical or logical)</li>
+                        <li>Spanning Tree Protocol (STP) failures</li>
+                        <li>Misconfigured or disabled STP</li>
+                        <li>Faulty network equipment</li>
+                        <li>Malicious broadcast attacks</li>
+                        <li>Improper network design with redundant links</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/broadcast-storm-topology.png" alt="Broadcast Storm Network Topology" class="img-large">
+                    <divs class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>3x Cisco 2960-24TT Switches (Switch0, Switch1, Switch2)</li>
+                            <li>Redundant links between switches (creating potential loops)</li>
+                            <li>6x Client PCs (PC0-PC5)</li>
+                        </ul>
+                    </divs>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Problem Demonstration</h2>
+                <div class="test-results">
+                    <h3>Broadcast Storm Symptoms:</h3>
+                    <img src="../images/broadcast-storm-effect.png" alt="Ping Timeout During Broadcast Storm" class="img-medium">
+                    <div class="warning-note">
+                        <p>During a broadcast storm, ping requests time out as the network becomes overwhelmed with broadcast traffic. Only occasional responses may get through as seen in the image where most packets are lost.</p>
+                    </div>
+
+                    <h3>Root Cause:</h3>
+                    <img src="../images/broadcast-switch-config.png" alt="Spanning Tree Disabled" class="img-medium">
+                    <div class="warning-note">
+                        <p>The root cause of the broadcast storm is disabled Spanning Tree Protocol (STP) on the switches. Without STP, network loops cause broadcast packets to circulate indefinitely, overwhelming the network.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Solution Steps</h2>
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <h4>Step 1: Identify the Loop</h4>
+                        <p>First, identify that a broadcast storm is occurring by observing network symptoms such as:</p>
+                        <ul>
+                            <li>Failed ping attempts with timeouts</li>
+                            <li>High CPU utilization on switches</li>
+                            <li>Excessive broadcast traffic</li>
+                        </ul>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 2: Enable Spanning Tree Protocol</h4>
+                        <div class="config-image">
+                            <img src="../images/broadcast-storm-fix.png" alt="Spanning Tree Configuration" class="img-medium">
+                            <div class="config-block">
+                                <pre><code>
+Switch>enable
+Switch#configure terminal
+Switch(config)#spanning-tree vlan 1
+Switch(config)#exit
+Switch#
+
+Switch#show spanning-tree vlan 1
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.C78A.A8C4
+             This bridge is the root
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.C78A.A8C4
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20</code></pre>
+                            </div>
+                            <p>Spanning Tree Protocol (STP) prevents loops by placing redundant links in a blocking state, allowing only one active path between any two network nodes.</p>
+                        </div>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 3: Apply Configuration to All Switches</h4>
+                        <p>The same spanning-tree configuration must be applied to all switches in the network:</p>
+                        <ul>
+                            <li>Enable spanning-tree on Switch0</li>
+                            <li>Enable spanning-tree on Switch1</li>
+                            <li>Enable spanning-tree on Switch2</li>
+                        </ul>
+                        <p>This ensures that the entire network is protected against loops and broadcast storms.</p>
+                    </div>
+
+                    <div class="solution-step">
+                        <h4>Step 4: Verify STP Operation</h4>
+                        <p>After enabling STP on all switches, verify that it's working correctly by checking the spanning-tree status:</p>
+                        <ul>
+                            <li>One switch becomes the root bridge</li>
+                            <li>Redundant paths are placed in blocking state (BLK)</li>
+                            <li>Active paths are in forwarding state (FWD)</li>
+                        </ul>
+                        <p>In the output above, we can see that the switch has become the root bridge and some interfaces are in forwarding state while one is in blocking state.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Verification and Testing</h2>
+                <div class="test-results">
+                    <h3>Successful Network Connectivity:</h3>
+                    <img src="../images/broadcast-ping-success-after-fix.png" alt="Successful Ping After Fix" class="img-medium">
+                    <div class="success-note">
+                        <p>After implementing STP on all switches, network connectivity is restored with consistent ping responses and normal network operation. The ping statistics show 0% packet loss, confirming the broadcast storm has been resolved.</p>
+                    </div>
+
+                    <h3>STP Status:</h3>
+                    <p>The spanning-tree output shows:</p>
+                    <ul>
+                        <li>STP is enabled and functioning properly</li>
+                        <li>Root bridge has been elected</li>
+                        <li>Redundant paths are properly managed (some ports in blocking state)</li>
+                        <li>Network topology is stable</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Common Issues and Solutions:</h3>
+                    <ul>
+                        <li><strong>Issue:</strong> STP not enabled on all switches
+                            <br><strong>Solution:</strong> Verify and enable STP on all network switches</li>
+                        
+                        <li><strong>Issue:</strong> Inconsistent STP configurations
+                            <br><strong>Solution:</strong> Standardize STP mode and parameters across all switches</li>
+                        
+                        <li><strong>Issue:</strong> Physical loops created by users
+                            <br><strong>Solution:</strong> Implement port security and user education</li>
+                        
+                        <li><strong>Issue:</strong> Faulty network interface causing broadcast storms
+                            <br><strong>Solution:</strong> Identify and replace faulty hardware</li>
+                    </ul>
+
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show spanning-tree</code> - Verify STP is running and check port states</li>
+                            <li><code>show interfaces counters</code> - Check for excessive broadcast packets</li>
+                            <li><code>show processes cpu sorted</code> - Monitor CPU utilization</li>
+                            <li><code>ping [destination-ip]</code> - Test network connectivity</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Best Practices</h2>
+                <div class="problem-description">
+                    <ul>
+                        <li>Always enable STP on all switches, even in small networks</li>
+                        <li>Consider using Rapid PVST+ for faster convergence</li>
+                        <li>Implement storm control as an additional layer of protection</li>
+                        <li>Document network topology and redundant links</li>
+                        <li>Monitor broadcast traffic levels as part of regular network maintenance</li>
+                        <li>Use network monitoring tools to detect broadcast storms early</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice this configuration:</p>
+                    <a href="../packet-tracer/broadcast-problem.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

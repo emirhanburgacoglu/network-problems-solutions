@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routing Loop Issue | Network Solutions</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/problem-detail.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Network Solutions</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="problem1.html">VLAN Routing</a>
+                <a href="problem2.html">DHCP Scope</a>
+                <a href="problem3.html">DNS Resolution</a>
+                <a href="problem4.html" class="active">Routing Loop</a>
+                <a href="problem5.html">Broadcast Storm</a>
+                <a href="problem6.html">ACL Issues</a>
+                <a href="problem7.html">Bandwidth</a>
+                <a href="problem8.html">Port Security</a>
+                <a href="problem9.html">Redundant Link</a>
+                <a href="problem10.html">Authentication</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <article class="problem-detail">
+            <header class="problem-header">
+                <h1>Routing Loop Issue</h1>
+                <div class="problem-meta">
+                    <span class="layer">Layer 3</span>
+                    <span class="difficulty">Difficulty: High</span>
+                </div>
+            </header>
+
+            <section class="problem-section">
+                <h2>Problem Description</h2>
+                <div class="problem-description">
+                    <h3>Issue Overview:</h3>
+                    <p>Routing loops occur when network packets continuously circle between routers without reaching their intended destination. This Layer 3 issue severely impacts network performance, causing packet loss and increased latency.</p>
+                    
+                    <h3>Common Symptoms:</h3>
+                    <ul>
+                        <li>Packets never reach their destination</li>
+                        <li>High latency and packet loss</li>
+                        <li>TTL expired messages in traceroute</li>
+                        <li>Increased router CPU utilization</li>
+                        <li>Network congestion and performance degradation</li>
+                    </ul>
+
+                    <h3>Root Causes:</h3>
+                    <ul>
+                        <li>Misconfigured static routes</li>
+                        <li>Conflicting routing protocol configurations</li>
+                        <li>Incorrect route summarization</li>
+                        <li>Route redistribution issues</li>
+                        <li>Network topology changes without proper route updates</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Network Setup</h2>
+                <div class="topology-container">
+                    <img src="../images/routing-loop-topology.png" alt="Network Topology" class="img-large">
+                    <div class="topology-description">
+                        <h3>Network Components:</h3>
+                        <ul>
+                            <li>3x Cisco 2911 Routers</li>
+                            <li>1x Cisco 2960 Switch</li>
+                            <li>2x End devices (PC0 and PC1)</li>
+                            <li>IP addressing scheme using 10.0.0.0/30 and 192.168.1.0/24 networks</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Initial Configuration</h2>
+                <div class="config-steps">
+                    <div class="router-config">
+                        <h3>Router0 Configuration</h3>
+                        <img src="../images/routing-loop-router0-config.png" alt="Router0 Initial Configuration" class="img-medium">
+                        <div class="config-description">
+                            <p>Basic IP configuration of Router0 interfaces:</p>
+                            <ul>
+                                <li>GigabitEthernet0/0: 10.0.0.1/30</li>
+                                <li>GigabitEthernet0/1: 10.0.0.5/30</li>
+                                <li>GigabitEthernet0/2: 192.168.1.1/24</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="router-config">
+                        <h3>Router1 Configuration</h3>
+                        <img src="../images/routing-loop-router1-config.png" alt="Router1 Initial Configuration" class="img-medium">
+                        <div class="config-description">
+                            <p>Basic IP configuration of Router1 interfaces:</p>
+                            <ul>
+                                <li>GigabitEthernet0/0: 10.0.0.2/30</li>
+                                <li>GigabitEthernet0/1: 10.0.0.9/30</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="router-config">
+                        <h3>Router2 Configuration</h3>
+                        <img src="../images/routing-loop-router2-config.png" alt="Router2 Initial Configuration" class="img-medium">
+                        <div class="config-description">
+                            <p>Basic IP configuration of Router2 interfaces:</p>
+                            <ul>
+                                <li>GigabitEthernet0/0: 10.0.0.10/30</li>
+                                <li>GigabitEthernet0/1: 10.0.0.6/30</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="pc-config">
+                        <h3>End Device Configuration</h3>
+                        <img src="../images/routing-loop-pc1-config.png" alt="PC1 Configuration" class="img-medium">
+                        <div class="config-description">
+                            <p>PC configurations:</p>
+                            <ul>
+                                <li>PC0: 192.168.1.10/24, Gateway: 192.168.1.1</li>
+                                <li>PC1: 192.168.1.20/24, Gateway: 192.168.1.1</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Problem Creation and Demonstration</h2>
+                <div class="problem-demo">
+                    <div class="static-routes">
+                        <h3>Problematic Static Routes</h3>
+                        <img src="../images/routing-loop-static-config.png" alt="Static Route Configuration" class="img-medium">
+                        <div class="config-description">
+                            <p>Creating routing loop with static routes:</p>
+                            <pre><code>
+Router0(config)#ip route 192.168.2.0 255.255.255.0 10.0.0.2
+Router1(config)#ip route 192.168.2.0 255.255.255.0 10.0.0.10
+Router2(config)#ip route 192.168.2.0 255.255.255.0 10.0.0.1</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="problem-verification">
+                        <h3>Loop Verification</h3>
+                        <img src="../images/routing-loop-tracert.png" alt="Traceroute showing routing loop" class="img-medium">
+                        <div class="verification-description">
+                            <p>Traceroute output showing the routing loop:</p>
+                            <ul>
+                                <li>Hop 1: 192.168.1.1 (Router0)</li>
+                                <li>Hop 2: 10.0.0.2 (Router1)</li>
+                                <li>Hop 3: 10.0.0.6 (Router2)</li>
+                                <li>Hop 4: * (Timeout - Loop continues)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Solution Implementation</h2>
+                <div class="solution-steps">
+                    <div class="ospf-config">
+                        <h3>OSPF Configuration</h3>
+                        <div class="router-ospf">
+                            <h4>Router0 OSPF</h4>
+                            <img src="../images/routing-loop-router0-ospf.png" alt="Router0 OSPF Configuration" class="img-medium">
+                        </div>
+                        <div class="router-ospf">
+                            <h4>Router1 OSPF</h4>
+                            <img src="../images/routing-loop-router1-ospf.png" alt="Router1 OSPF Configuration" class="img-medium">
+                        </div>
+                        <div class="router-ospf">
+                            <h4>Router2 OSPF</h4>
+                            <img src="../images/routing-loop-router2-ospf.png" alt="Router2 OSPF Configuration" class="img-medium">
+                        </div>
+                    </div>
+
+                    <div class="verification">
+                        <h3>Solution Verification</h3>
+                        <img src="../images/routing-loop-router0-verification.png" alt="OSPF Verification" class="img-medium">
+                        <div class="verification-description">
+                            <p>Verification shows:</p>
+                            <ul>
+                                <li>OSPF neighbors established</li>
+                                <li>Correct routes in routing table</li>
+                                <li>No routing loops present</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Troubleshooting Guide</h2>
+                <div class="troubleshooting-tips">
+                    <h3>Verification Commands:</h3>
+                    <div class="verification-steps">
+                        <ul>
+                            <li><code>show ip route</code> - Display routing table</li>
+                            <li><code>show ip ospf neighbor</code> - Verify OSPF relationships</li>
+                            <li><code>traceroute</code> - Test packet path</li>
+                            <li><code>show ip protocols</code> - Verify routing protocols</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="problem-section">
+                <h2>Packet Tracer Simulation</h2>
+                <div class="simulation-download">
+                    <p>Download the complete Packet Tracer simulation file to practice this configuration:</p>
+                    <a href="../packet-tracer/routing-loop.pkt" class="download-btn">Download Simulation File</a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Network Solutions - Final Design Project 2025</p>
+        </div>
+    </footer>
+</body>
+</html>
